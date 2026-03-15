@@ -26,7 +26,7 @@
  * @param num 邮箱数量
  * @retval 无
  */
-void SAMPIint(SAMP_HANDLE_T * pHandle, unsigned int * pAvailRing, unsigned int * pUsedRing, SAMP_MAIL_T * pMail, unsigned int num)
+void SAMPInit(SAMP_HANDLE_T * pHandle, unsigned int * pAvailRing, unsigned int * pUsedRing, SAMP_MAIL_T * pMail, unsigned int num)
 {
     // 如果邮箱数量为0，则直接返回
     if (num == 0) {

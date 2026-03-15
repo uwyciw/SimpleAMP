@@ -59,7 +59,7 @@ typedef struct {
  * @param num 邮箱数量
  * @retval 无
  */
-void SAMPIint(SAMP_HANDLE_T * pHandle, unsigned int * pAvailRing, unsigned int * pUsedRing, SAMP_MAIL_T * pMail, unsigned int num);
+void SAMPInit(SAMP_HANDLE_T * pHandle, unsigned int * pAvailRing, unsigned int * pUsedRing, SAMP_MAIL_T * pMail, unsigned int num);
 
 /**
  * @brief
