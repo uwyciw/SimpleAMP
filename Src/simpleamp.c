@@ -87,7 +87,6 @@ void SAMPSendMail(SAMP_HANDLE_T * pHandle, SAMP_MAIL_T * pMail)
 unsigned int SAMPFreeMail(SAMP_HANDLE_T * pHandle, unsigned int * pLastUsedIndex)
 {
     unsigned int counter;
-    unsigned int index = (*pLastUsedIndex) % (pHandle->num);
     unsigned int * usedRing = pHandle->pUsedRing;
     SAMP_MAIL_T * mailArray = pHandle->pMail;
 
@@ -98,7 +97,7 @@ unsigned int SAMPFreeMail(SAMP_HANDLE_T * pHandle, unsigned int * pLastUsedIndex
 
     counter = pHandle->usedIndex - (*pLastUsedIndex);
     for (unsigned int i = 0u; i < counter; i++) {
-        mailArray[usedRing[index + i]].isIdle = true;
+        mailArray[usedRing[(*pLastUsedIndex) + i] % (pHandle->num)].isIdle = true;
     }
     *pLastUsedIndex = (*pLastUsedIndex) + counter;
 
@@ -113,15 +112,15 @@ unsigned int SAMPFreeMail(SAMP_HANDLE_T * pHandle, unsigned int * pLastUsedIndex
  */
 SAMP_MAIL_T * SAMPReceiveMail(SAMP_HANDLE_T * pHandle, unsigned int * pLastAvailIndex)
 {
-    SAMP_MAIL_T * mail = NULL;
+    SAMP_MAIL_T * mail;
 
     atomic_thread_fence(memory_order_seq_cst);
 
     if (pHandle->availIndex == (*pLastAvailIndex))
-        return mail;
+        return NULL;
 
     mail = pHandle->pMail + (pHandle->pAvailRing[(*pLastAvailIndex) % (pHandle->num)]);
     *pLastAvailIndex = *pLastAvailIndex + 1u;
-    
+
     return mail;
 }
