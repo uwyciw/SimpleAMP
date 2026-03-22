@@ -75,7 +75,7 @@ static void MX_USART2_UART_Init(void);
 void HAL_HSEM_FreeCallback(uint32_t SemMask)
 {
     // 在中断中接收SimpleAMP消息
-    SAMP_MAIL_T * pMail = SAMPReceiveMail(&sampHandle, &lastAvailIndex);
+    SAMP_MAIL_T * pMail = SAMPPollMail(&sampHandle, lastAvailIndex);
     
     if(pMail != NULL) {
         // 如果成功接收到邮件，通过USART2发送数据
@@ -86,6 +86,9 @@ void HAL_HSEM_FreeCallback(uint32_t SemMask)
             char newline[] = "\r\n";
             HAL_UART_Transmit(&huart2, (uint8_t*)newline, 2, HAL_MAX_DELAY);
         }
+        
+        // 标记邮箱为已处理，使其可以被发送方回收
+        SAMPTabUsedMail(&sampHandle, &lastAvailIndex);
         
         // CM4处理完数据后，通知CM7可以回收邮箱
         HAL_HSEM_FastTake(HSEM_ID_0);

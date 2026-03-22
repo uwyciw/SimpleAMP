@@ -94,7 +94,7 @@ void HAL_HSEM_FreeCallback(uint32_t SemMask)
     static unsigned int lastUsedIndex = 0;
     
     // 回收已处理的邮箱，使其可以重新使用
-    SAMPFreeMail(&sampHandle, &lastUsedIndex);
+    SAMPFreeUsedMail(&sampHandle, &lastUsedIndex);
     
     // SemMask参数表示哪个信号量被释放
 }

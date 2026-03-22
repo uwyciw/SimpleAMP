@@ -104,7 +104,7 @@ void SAMPSendMail(SAMP_HANDLE_T * pHandle, SAMP_MAIL_T * pMail)
  * @param pLastUsedIndex 指向上次处理完成索引的指针
  * @retval 返回被释放的邮箱数量
  */
-unsigned int SAMPFreeMail(SAMP_HANDLE_T * pHandle, unsigned int * pLastUsedIndex)
+unsigned int SAMPFreeUsedMail(SAMP_HANDLE_T * pHandle, unsigned int * pLastUsedIndex)
 {
     unsigned int counter;                         // 计数器，记录需要释放的邮箱数量
     unsigned int * usedRing = pHandle->pUsedRing; // 指向已用环的本地指针
@@ -134,30 +134,47 @@ unsigned int SAMPFreeMail(SAMP_HANDLE_T * pHandle, unsigned int * pLastUsedIndex
 }
 
 /**
- * @brief 接收邮箱函数实现
- * 从可用环中获取待处理的邮箱，获取对端核心发送的数据
- * @note 此函数检查可用环，获取新的邮箱数据，返回指向邮箱的指针
+ * @brief 轮询接收邮箱函数实现
+ * 从可用环中检查并获取待处理的邮箱，但不更新索引，仅用于检查是否有新数据
+ * @note 此函数检查可用环，获取新的邮箱数据，但不改变内部状态，需配合SAMPTabUsedMail使用
  * @param pHandle 指向邮箱句柄的指针
- * @param pLastAvailIndex 指向上次接收完成索引的指针
+ * @param lastAvailIndex 上次处理完成的索引
  * @retval 成功时返回接收到的邮箱指针，无新邮箱时返回NULL
  */
-SAMP_MAIL_T * SAMPReceiveMail(SAMP_HANDLE_T * pHandle, unsigned int * pLastAvailIndex)
+SAMP_MAIL_T * SAMPPollMail(SAMP_HANDLE_T * pHandle, unsigned int lastAvailIndex)
 {
     SAMP_MAIL_T * mail; // 用于存储接收到的邮箱指针
 
     // 插入内存屏障，确保内存访问顺序正确
     atomic_thread_fence(memory_order_seq_cst);
-
     // 如果当前可用索引与上次接收完成的索引相同，则没有新的邮箱
-    if (pHandle->availIndex == (*pLastAvailIndex))
+    if (pHandle->availIndex == lastAvailIndex)
         return NULL;
 
     // 根据可用环中的序列号获取对应邮箱的指针
-    mail = pHandle->pMail + (pHandle->pAvailRing[(*pLastAvailIndex) % (pHandle->num)]);
-
-    // 更新上次接收完成的索引
-    *pLastAvailIndex = *pLastAvailIndex + 1u;
+    mail = pHandle->pMail + (pHandle->pAvailRing[lastAvailIndex % (pHandle->num)]);
 
     // 返回接收到的邮箱指针
     return mail;
+}
+
+bool SAMPTabUsedMail(SAMP_HANDLE_T * pHandle, unsigned int * pLastAvailIndex)
+{
+    SAMP_MAIL_T * mail; 
+    unsigned int usedIndex;
+
+    atomic_thread_fence(memory_order_seq_cst);
+    if (pHandle->availIndex == (*pLastAvailIndex))
+        return false;
+
+    mail = pHandle->pMail + (pHandle->pAvailRing[(*pLastAvailIndex) % (pHandle->num)]);
+    usedIndex = (pHandle->usedIndex) % (pHandle->num);
+
+    pHandle->pUsedRing[usedIndex] = mail->seq;
+    atomic_thread_fence(memory_order_seq_cst);
+    pHandle->usedIndex = pHandle->usedIndex + 1u;
+
+    *pLastAvailIndex = *pLastAvailIndex + 1u;
+
+    return true;
 }

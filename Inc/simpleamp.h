@@ -62,10 +62,11 @@ typedef struct {
 void SAMPInit(SAMP_HANDLE_T * pHandle, unsigned int * pAvailRing, unsigned int * pUsedRing, SAMP_MAIL_T * pMail, unsigned int num);
 
 /**
- * @brief
- * @note
- * @param
- * @retval
+ * @brief 获取空闲邮箱函数
+ * 在邮箱队列中查找并返回一个空闲状态的邮箱
+ * @note 此函数遍历邮箱数组查找isIdle为true的邮箱，如果找到多个空闲邮箱则返回最后一个
+ * @param pHandle 指向邮箱句柄的指针
+ * @retval 成功时返回空闲邮箱的指针，无空闲邮箱时返回NULL
  */
 SAMP_MAIL_T * SAMPGetIdleMail(SAMP_HANDLE_T * pHandle);
 
@@ -87,16 +88,26 @@ void SAMPSendMail(SAMP_HANDLE_T * pHandle, SAMP_MAIL_T * pMail);
  * @param pLastUsedIndex 指向上次处理完成索引的指针
  * @retval 返回被释放的邮箱数量
  */
-unsigned int SAMPFreeMail(SAMP_HANDLE_T * pHandle, unsigned int * pLastUsedIndex);
+unsigned int SAMPFreeUsedMail(SAMP_HANDLE_T * pHandle, unsigned int * pLastUsedIndex);
 
 /**
- * @brief 接收邮箱函数
- * 从可用环中获取待处理的邮箱，获取对端核心发送的数据
- * @note 此函数检查可用环，获取新的邮箱数据，类似VirtIO的buffer消费
+ * @brief 轮询接收邮箱函数
+ * 从可用环中检查并获取待处理的邮箱，但不更新索引，仅用于检查是否有新数据
+ * @note 此函数检查可用环，获取新的邮箱数据，但不改变内部状态，需配合SAMPTabUsedMail使用
  * @param pHandle 指向邮箱句柄的指针
- * @param pLastAvailIndex 指向上次接收完成索引的指针
+ * @param lastAvailIndex 上次处理完成的索引
  * @retval 成功时返回接收到的邮箱指针，无新邮箱时返回NULL
  */
-SAMP_MAIL_T * SAMPReceiveMail(SAMP_HANDLE_T * pHandle, unsigned int * pLastAvailIndex);
+SAMP_MAIL_T * SAMPPollMail(SAMP_HANDLE_T * pHandle, unsigned int lastAvailIndex);
+
+/**
+ * @brief 标记已处理邮箱函数
+ * 将已处理的邮箱标记为已使用，并将其添加到已用环中，供发送方回收
+ * @note 此函数将邮箱添加到已用环，以便发送方能够回收该邮箱
+ * @param pHandle 指向邮箱句柄的指针
+ * @param pLastAvailIndex 指向上次接收完成索引的指针
+ * @retval 处理成功返回true，无待处理邮箱返回false
+ */
+bool SAMPTabUsedMail(SAMP_HANDLE_T * pHandle, unsigned int * pLastAvailIndex);
 
 #endif // _SIMPLEAMP_H_
