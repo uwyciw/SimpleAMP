@@ -80,29 +80,29 @@ void SAMPSendMail(SAMP_HANDLE_T * pHandle, SAMP_MAIL_T * pMail);
 
 将指定邮箱添加到可用环中，通知对端核心有新数据。
 
-### 轮询接收邮箱
+### 获取邮箱
 ```c
-SAMP_MAIL_T * SAMPPollMail(SAMP_HANDLE_T * pHandle, 
+SAMP_MAIL_T * SAMPAcquireMail(SAMP_HANDLE_T * pHandle, 
                            unsigned int lastAvailIndex);
 ```
 
-轮询检查是否有新的邮箱消息，但不更新内部索引。
+从可用环中获取待处理的邮箱，类似VirtIO的buffer消费。注意此函数使用值传递，不会自动更新索引，需要调用者手动管理索引。
 
-### 标记已处理邮箱
+### 释放邮箱给生产者
 ```c
-bool SAMPTabUsedMail(SAMP_HANDLE_T * pHandle, 
-                     unsigned int * pLastAvailIndex);
+bool SAMPReleaseMailToProducer(SAMP_HANDLE_T * pHandle, 
+                              unsigned int * pLastAvailIndex);
 ```
 
-标记邮箱为已处理，并将其添加到已用环中以供回收。
+将已处理的邮箱释放回生产者，使其可以被重新使用。
 
-### 释放邮箱
+### 回收邮箱
 ```c
-unsigned int SAMPFreeMail(SAMP_HANDLE_T * pHandle, 
-                          unsigned int * pLastUsedIndex);
+unsigned int SAMPReclaimMails(SAMP_HANDLE_T * pHandle, 
+                            unsigned int * pLastUsedIndex);
 ```
 
-释放已完成处理的邮箱，使其可重新使用。
+回收已完成处理的邮箱，将其状态标记为空闲，以便重新使用。
 
 ## 使用示例
 
@@ -150,14 +150,17 @@ if(pMail != NULL) {
 // 在中断或轮询中接收数据
 unsigned int lastAvailIndex = 0;  // 需要维护此变量
 
-// 轮询检查是否有新数据
-SAMP_MAIL_T * pMail = SAMPPollMail(&sampHandle, lastAvailIndex);
+// 获取待处理的邮箱（使用值传递）
+SAMP_MAIL_T * pMail = SAMPAcquireMail(&sampHandle, lastAvailIndex);
 if(pMail != NULL) {
     // 处理接收到的数据
     process_data(pMail->address, pMail->length);
     
-    // 标记邮箱为已处理，使其可以被发送方回收
-    SAMPTabUsedMail(&sampHandle, &lastAvailIndex);
+    // 将邮箱释放回生产者，使其可以被回收
+    SAMPReleaseMailToProducer(&sampHandle, &lastAvailIndex);
+    
+    // 由于SAMPAcquireMail使用值传递，我们需要手动更新索引
+    lastAvailIndex++;
     
     // 通知发送方邮箱已处理完毕
     // HAL_HSEM_Release(HSEM_ID_0, 0);

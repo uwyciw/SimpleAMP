@@ -2,7 +2,7 @@
 <Workspace>
     <ConfigDictionary>
         <CurrentConfigs>
-            <Project>SimpleAMP/SimpleAMP_CM7</Project>
+            <Project>SimpleAMP/SimpleAMP_CM4</Project>
         </CurrentConfigs>
     </ConfigDictionary>
     <WindowStorage>
@@ -108,7 +108,7 @@
             </MFCToolBarParameters>
             <CommandManager>
                 <CommandsWithoutImages>0F000D8400000F84000008840000FFFFFFFF54840000328100001C8100000984000000880000018800000288000003880000048800000588000053840000</CommandsWithoutImages>
-                <MenuUserImages>0600048400004D000000068400004F00000030840000530000000E840000510000000B810000690000000D8100006B000000</MenuUserImages>
+                <MenuUserImages>0600048400004D000000068400004F0000000E8400005100000030840000530000000B810000690000000D8100006B000000</MenuUserImages>
             </CommandManager>
             <Pane-59393>
                 <ID>0</ID>
@@ -171,9 +171,9 @@
                     <item>_I0</item>
                 </col-names>
                 <col-widths>
-                    <item>441</item>
+                    <item>446</item>
                     <item>40</item>
-                    <item>942</item>
+                    <item>955</item>
                     <item>20</item>
                 </col-widths>
                 <BuildLogLevel>2</BuildLogLevel>
@@ -432,7 +432,7 @@
                     <item>0</item>
                 </SB_TypeFilter>
                 <SB_SBW_File>
-                    <item>D:\Git\SimpleAMP\_example\EWARM\SimpleAMP_CM7\BrowseInfo\SimpleAMP.pbw</item>
+                    <item>D:\Git\SimpleAMP\_example\EWARM\SimpleAMP_CM4\BrowseInfo\SimpleAMP.pbw</item>
                 </SB_SBW_File>
                 <col-names>
                     <item>File</item>

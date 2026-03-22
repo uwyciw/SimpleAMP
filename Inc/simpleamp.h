@@ -81,33 +81,33 @@ SAMP_MAIL_T * SAMPGetIdleMail(SAMP_HANDLE_T * pHandle);
 void SAMPSendMail(SAMP_HANDLE_T * pHandle, SAMP_MAIL_T * pMail);
 
 /**
- * @brief 释放已处理邮箱函数
- * 释放已完成处理的邮箱，将其状态标记为空闲，以便重新使用
+ * @brief 回收邮箱函数
+ * 回收已完成处理的邮箱，将其状态标记为空闲，以便重新使用
  * @note 此函数检查已用环，将对应的邮箱标记为isIdle=true
  * @param pHandle 指向邮箱句柄的指针
- * @param pLastUsedIndex 指向上次处理完成索引的指针
- * @retval 返回被释放的邮箱数量
+ * @param lastUsedIndex 上次处理完成索引
+ * @retval 返回被回收的邮箱数量
  */
-unsigned int SAMPFreeUsedMail(SAMP_HANDLE_T * pHandle, unsigned int * pLastUsedIndex);
+unsigned int SAMPReclaimMails(SAMP_HANDLE_T * pHandle, unsigned int * pLastUsedIndex);
 
 /**
- * @brief 轮询接收邮箱函数
- * 从可用环中检查并获取待处理的邮箱，但不更新索引，仅用于检查是否有新数据
- * @note 此函数检查可用环，获取新的邮箱数据，但不改变内部状态，需配合SAMPTabUsedMail使用
+ * @brief 获取邮箱函数
+ * 从可用环中获取待处理的邮箱，获取对端核心发送的数据
+ * @note 此函数检查可用环，获取新的邮箱数据，但不更新索引
  * @param pHandle 指向邮箱句柄的指针
- * @param lastAvailIndex 上次处理完成的索引
+ * @param lastAvailIndex 上次处理完成的索引值
  * @retval 成功时返回接收到的邮箱指针，无新邮箱时返回NULL
  */
-SAMP_MAIL_T * SAMPPollMail(SAMP_HANDLE_T * pHandle, unsigned int lastAvailIndex);
+SAMP_MAIL_T * SAMPAcquireMail(SAMP_HANDLE_T * pHandle, unsigned int lastAvailIndex);
 
 /**
- * @brief 标记已处理邮箱函数
+ * @brief 释放邮箱给生产者函数
  * 将已处理的邮箱标记为已使用，并将其添加到已用环中，供发送方回收
  * @note 此函数将邮箱添加到已用环，以便发送方能够回收该邮箱
  * @param pHandle 指向邮箱句柄的指针
  * @param pLastAvailIndex 指向上次接收完成索引的指针
  * @retval 处理成功返回true，无待处理邮箱返回false
  */
-bool SAMPTabUsedMail(SAMP_HANDLE_T * pHandle, unsigned int * pLastAvailIndex);
+bool SAMPReleaseMailToProducer(SAMP_HANDLE_T * pHandle, unsigned int * pLastAvailIndex);
 
 #endif // _SIMPLEAMP_H_
