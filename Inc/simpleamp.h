@@ -14,7 +14,7 @@
 #ifndef _SIMPLEAMP_H_
 #define _SIMPLEAMP_H_
 
-/* Includes ------------------------------------------------------------------*/
+ /* Includes ------------------------------------------------------------------*/
 #include <stdbool.h>
 #include <stdint.h>
 

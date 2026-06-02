@@ -11,7 +11,7 @@
  ******************************************************************************
  */
 
-/* Includes ------------------------------------------------------------------*/
+ /* Includes ------------------------------------------------------------------*/
 #include "simpleamp.h"
 #include <stdatomic.h>
 
@@ -160,7 +160,7 @@ SAMP_MAIL_T * SAMPAcquireMail(SAMP_HANDLE_T * pHandle, unsigned int lastAvailInd
 
 bool SAMPReleaseMailToProducer(SAMP_HANDLE_T * pHandle, unsigned int * pLastAvailIndex)
 {
-    SAMP_MAIL_T * mail; 
+    SAMP_MAIL_T * mail;
     unsigned int usedIndex;
 
     atomic_thread_fence(memory_order_seq_cst);
