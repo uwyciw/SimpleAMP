@@ -45,6 +45,8 @@ void SAMPInit(SAMP_HANDLE_T * pHandle, unsigned int * pAvailRing, unsigned int *
     for (unsigned int i = 0u; i < num; i++) {
         pMail[i].seq = i;       // 设置邮箱序列号
         pMail[i].isIdle = true; // 标记邮箱为空闲状态
+        pMail[i].address = NULL;
+        pMail[i].length = 0u;
     }
 }
 
@@ -123,7 +125,7 @@ unsigned int SAMPReclaimMails(SAMP_HANDLE_T * pHandle, unsigned int * pLastUsedI
     // 遍历这些邮箱并将它们标记为空闲状态
     for (unsigned int i = 0u; i < counter; i++) {
         // 根据已用环中的序列号找到对应的邮箱并标记为空闲
-        mailArray[usedRing[(*pLastUsedIndex) + i] % (pHandle->num)].isIdle = true;
+        mailArray[usedRing[((*pLastUsedIndex) + i) % (pHandle->num)] % (pHandle->num)].isIdle = true;
     }
 
     // 更新上次处理完成的索引
